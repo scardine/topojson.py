@@ -16,11 +16,12 @@ def is_infinit(n):
 def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_system=None, object_name='name',
              id_key='id', quantization_factor=1e4, property_transform=None):
 
-    id = lambda d: d['id']
+    id_ = lambda d: d[id_key]
 
-    def propertyTransform(outprop, key, inprop):
-        outprop[key] = inprop
-        return True
+    if property_transform is None:
+        def property_transform(outprop, key, inprop):
+            outprop[key] = inprop
+            return True
 
     stitch_poles = True
     verbose = False
@@ -41,9 +42,9 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
             system = systems["cartesian"]
         else:
             system = systems["spherical"]
-        if type(options) == type({}):
-            options["coordinate-system"] = system['name']
-    if system == systems['spherical']:
+        coordinate_system = system['name']
+
+    if coordinate_system == 'spherical':
         if oversize:
             raise Exception(u"spherical coordinates outside of [±180°, ±90°]")
         if stitch_poles:
@@ -56,14 +57,14 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
         if y0 < -90 + E:
             y0 = -90
         if y1 > 90 - E:
-            y1 = 90;
+            y1 = 90
     if is_infinit(x0):
         x0 = 0
     if is_infinit(x1):
-        x1 = 0;
+        x1 = 0
 
     if is_infinit(y0):
-        y0 = 0;
+        y0 = 0
     if is_infinit(y1):
         y1 = 0;
     [kx, ky] = makeKs(quantization_factor, x0, x1, y0, y1)
@@ -138,7 +139,7 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
                 geometry = {};
             else:
                 types.geometry(self, geometry)
-            geometry['id'] = id(geometry)
+            geometry['id'] = id_(geometry)
             if geometry['id'] == None:
                 del geometry['id']
             properties0 = geometry['properties']
