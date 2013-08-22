@@ -1,4 +1,5 @@
 # coding=utf8
+from collections import OrderedDict
 from mytypes import types
 from stitchpoles import stitch
 from coordinatesystems import systems
@@ -58,6 +59,7 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
             y0 = -90
         if y1 > 90 - E:
             y1 = 90
+
     if is_infinit(x0):
         x0 = 0
     if is_infinit(x1):
@@ -66,16 +68,17 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
     if is_infinit(y0):
         y0 = 0
     if is_infinit(y1):
-        y1 = 0;
+        y1 = 0
+
     [kx, ky] = make_ks(quantization_factor, x0, x1, y0, y1)
     if not quantization_factor:
         quantization_factor = x1 + 1
         x0 = y0 = 0
 
-    class findEmax(types):
+    class FindEmax(types):
         def __init__(self, obj):
             self.emax = 0
-            self.obj(obj)
+            self.obj = obj
 
         def point(self, point):
             x1 = point[0]
@@ -88,7 +91,7 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
             point[0] = int(x)
             point[1] = int(y)
 
-    finde = findEmax(objects)
+    finde = FindEmax(objects)
     e_max = finde.emax
     clock(objects, system['ringArea'])
 
@@ -156,7 +159,6 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
     makeTopoInst = makeTopo(objects)
     return {
         'type': "Topology",
-        'bbox': [x0, y0, x1, y1],
         'transform': {
             'scale': [1.0 / kx, 1.0 / ky],
             'translate': [x0, y0]
