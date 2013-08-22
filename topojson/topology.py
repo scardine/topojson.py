@@ -9,7 +9,7 @@ from clockwise import clock
 E = 1e-6
 
 
-def isInfinit(n):
+def is_infinit(n):
     return abs(n) == float('inf')
 
 
@@ -69,14 +69,14 @@ def topology(objects, options=False):
             y0 = -90
         if y1 > 90 - E:
             y1 = 90;
-    if isInfinit(x0):
+    if is_infinit(x0):
         x0 = 0
-    if isInfinit(x1):
+    if is_infinit(x1):
         x1 = 0;
 
-    if isInfinit(y0):
+    if is_infinit(y0):
         y0 = 0;
-    if isInfinit(y1):
+    if is_infinit(y1):
         y1 = 0;
     [kx, ky] = makeKs(Q, x0, x1, y0, y1)
     if not Q:
