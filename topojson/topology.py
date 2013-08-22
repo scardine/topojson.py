@@ -13,42 +13,30 @@ def is_infinit(n):
     return abs(n) == float('inf')
 
 
-def topology(objects, options=False):
-    Q = 1e4; # precision of quantization
+def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_system=None, object_name='name',
+             id_key='id', quantization_factor=1e4, property_transform=None):
+
     id = lambda d: d['id']
 
     def propertyTransform(outprop, key, inprop):
         outprop[key] = inprop
         return True
 
-    stitchPoles = True
+    stitch_poles = True
     verbose = False
-    emax = 0
-    system = False
-    objectName = 'name'
-    if type(options) == type({}):
-        if options.has_key('verbose'):
-            verbose = not not options['verbose']
-        if options.has_key('stitch-poles'):
-            stitchPoles = not not options["stitch-poles"]
-        if options.has_key('coordinate-system'):
-            system = systems[options["coordinate-system"]]
-        if options.has_key('quantization'):
-            Q = float(options["quantization"])
-        if options.has_key('id'):
-            id = options['id']
-        if options.has_key('property-transform'):
-            propertyTransform = options["property-transform"]
-        if options.has_key('name'):
-            objectName = options['name']
+    e_max = 0
+    object_name = 'name'
+    if coordinate_system:
+        system = systems[coordinate_system]
+
     if objects.has_key('type') and objects['type'] == 'FeatureCollection':
-        objects = {objectName: objects}
-    ln = Line(Q)
+        objects = {object_name: objects}
+    ln = Line(quantization_factor)
 
     [x0, x1, y0, y1] = bound(objects)
 
     oversize = x0 < -180 - E or x1 > 180 + E or y0 < -90 - E or y1 > 90 + E
-    if not system:
+    if coordinate_system is None:
         if oversize:
             system = systems["cartesian"]
         else:
@@ -58,7 +46,7 @@ def topology(objects, options=False):
     if system == systems['spherical']:
         if oversize:
             raise Exception(u"spherical coordinates outside of [±180°, ±90°]")
-        if stitchPoles:
+        if stitch_poles:
             stitch(objects)
             [x0, x1, y0, y1] = bound(objects)
         if x0 < -180 + E:
@@ -78,9 +66,9 @@ def topology(objects, options=False):
         y0 = 0;
     if is_infinit(y1):
         y1 = 0;
-    [kx, ky] = makeKs(Q, x0, x1, y0, y1)
-    if not Q:
-        Q = x1 + 1
+    [kx, ky] = makeKs(quantization_factor, x0, x1, y0, y1)
+    if not quantization_factor:
+        quantization_factor = x1 + 1
         x0 = y0 = 0
 
     class findEmax(types):
@@ -100,7 +88,7 @@ def topology(objects, options=False):
             point[1] = int(y)
 
     finde = findEmax(objects)
-    emax = finde.emax
+    e_max = finde.emax
     clock(objects, system['ringArea'])
 
     class findCoincidences(types):
@@ -158,7 +146,7 @@ def topology(objects, options=False):
                 properties1 = {}
                 del geometry['properties']
                 for key0 in properties0:
-                    if propertyTransform(properties1, key0, properties0[key0]):
+                    if property_transform(properties1, key0, properties0[key0]):
                         geometry['properties'] = properties1
             if geometry.has_key('arcs'):
                 del geometry['coordinates']
