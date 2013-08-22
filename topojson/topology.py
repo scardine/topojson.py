@@ -179,20 +179,24 @@ def makeKs(Q, x0, x1, y0, y1):
 def linesEqual(a, b):
     if not (type(a) == type(b) == type([])):
         return True
-    n = len(a);
+    n = len(a)
     i = 0
     if len(b) != n:
         return False
     while i < n:
         if a[i] != b[i]:
-            return False;
+            return False
         i += 1
-    return True;
+    return True
 
 
-def pointCompare(a, b):
-    if isPoint(a) and isPoint(b):
+def point_compare(a, b):
+    if is_point(a) and is_point(b):
         return a[0] - b[0] or a[1] - b[1]
 
 
-isPoint = lambda x: type(x) == type([]) and len(x) == 2
+def is_point(p):
+    try:
+        float(p[0]), float(p[1])
+    except (TypeError, IndexError):
+        return False
