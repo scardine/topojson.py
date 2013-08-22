@@ -67,7 +67,7 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
         y0 = 0
     if is_infinit(y1):
         y1 = 0;
-    [kx, ky] = makeKs(quantization_factor, x0, x1, y0, y1)
+    [kx, ky] = make_ks(quantization_factor, x0, x1, y0, y1)
     if not quantization_factor:
         quantization_factor = x1 + 1
         x0 = y0 = 0
@@ -166,7 +166,7 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
     }
 
 
-def makeKs(Q, x0, x1, y0, y1):
+def make_ks(Q, x0, x1, y0, y1):
     [x, y] = [1, 1]
     if Q:
         if x1 - x0:
