@@ -108,6 +108,7 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
 
     fcInst = findCoincidences(objects)
     polygon = lambda poly: map(ln.lineClosed, poly)
+
     #Convert features to geometries, and stitch together arcs.
     class makeTopo(types):
         def Feature(self, feature):
