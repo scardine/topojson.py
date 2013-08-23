@@ -26,7 +26,7 @@ topojson({'name1':load(open(path1)),'name1':load(open(name2))},'compined.topojso
 
 
 known issues:
-__init__.py
+`__init__.py`
 - coding style only a mother could love
 - holds everything in memory, this could be bad
 - should be able to incrementally add features
