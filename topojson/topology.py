@@ -1,13 +1,15 @@
 # coding=utf8
-from collections import OrderedDict
 from mytypes import types
 from stitchpoles import stitch
 from coordinatesystems import systems
 from bounds import bound
 from line import Line
 from clockwise import clock
+import logging
 
 E = 1e-6
+
+logging.basicConfig(format='%(asctime)s %(message)s')
 
 
 def is_infinit(n):
@@ -43,7 +45,7 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
             system = systems["cartesian"]
         else:
             system = systems["spherical"]
-        coordinate_system = system['name']
+        coordinate_system = system.name
 
     if coordinate_system == 'spherical':
         if oversize:
@@ -70,7 +72,9 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
     if is_infinit(y1):
         y1 = 0
 
-    [kx, ky] = make_ks(quantization_factor, x0, x1, y0, y1)
+    logging.debug("{}".format([x0, y0, x1, y1]))
+
+    kx, ky = make_ks(quantization_factor, x0, x1, y0, y1)
     if not quantization_factor:
         quantization_factor = x1 + 1
         x0 = y0 = 0
@@ -93,7 +97,7 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
 
     finde = FindEmax(objects)
     e_max = finde.emax
-    clock(objects, system['ringArea'])
+    clock(objects, system.ring_area)
 
     class findCoincidences(types):
         def line(self, line):
@@ -109,15 +113,15 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
         def Feature(self, feature):
             geometry = feature["geometry"]
             if feature['geometry'] == None:
-                geometry = {};
+                geometry = {}
             if feature.has_key('id'):
                 geometry['id'] = feature['id']
             if feature.has_key('properties'):
                 geometry['properties'] = feature['properties']
-            return self.geometry(geometry);
+            return self.geometry(geometry)
 
         def FeatureCollection(self, collection):
-            collection['type'] = "GeometryCollection";
+            collection['type'] = "GeometryCollection"
             collection['geometries'] = map(self.Feature, collection['features'])
             del collection['features']
             return collection
@@ -138,12 +142,12 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
             lineString['arcs'] = ln.lineOpen(lineString['coordinates'])
 
         def geometry(self, geometry):
-            if geometry == None:
-                geometry = {};
+            if geometry is None:
+                geometry = {}
             else:
                 types.geometry(self, geometry)
             geometry['id'] = id_(geometry)
-            if geometry['id'] == None:
+            if geometry['id'] is None:
                 del geometry['id']
             properties0 = geometry['properties']
             if properties0:
@@ -152,9 +156,9 @@ def topology(objects, stitch_poles=True, verbose=True, e_max=0, coordinate_syste
                 for key0 in properties0:
                     if property_transform(properties1, key0, properties0[key0]):
                         geometry['properties'] = properties1
-            if geometry.has_key('arcs'):
+            if 'arcs' in geometry:
                 del geometry['coordinates']
-            return geometry;
+            return geometry
 
     makeTopoInst = makeTopo(objects)
     return {
@@ -182,17 +186,22 @@ def lines_equal(a, b):
     for arg in (a, b):
         if not isinstance(arg, list):
             return False
-
     return a == b
 
 
-def point_compare(a, b):
+def distinct_point(a, b):
     if is_point(a) and is_point(b):
-        return a[0] - b[0] or a[1] - b[1]
+        return a != b
+    return True
 
 
 def is_point(p):
+    if isinstance(p, basestring):
+        return False
+
     try:
         float(p[0]), float(p[1])
-    except (TypeError, IndexError):
+    except (TypeError, IndexError, ValueError):
         return False
+    else:
+        return len(p) == 2
